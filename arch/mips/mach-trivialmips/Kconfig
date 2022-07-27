@@ -10,6 +10,9 @@ config TARGET_TRIVIALMIPS_THINPAD
 config TARGET_TRIVIALMIPS_NSCSCC
     bool "NSCSCC board 2019"
 
+config TARGET_MEGASOC_DEMO
+    bool "MegaSoC Demo SoC"
+
 endchoice
 
 source "board/thucst/Kconfig"
