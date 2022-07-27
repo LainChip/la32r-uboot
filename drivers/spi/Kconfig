@@ -199,6 +199,11 @@ config ROCKCHIP_SPI
 	  This uses driver model and requires a device tree binding to
 	  operate.
 
+config LOONGSON_SPI
+	bool "Loongson SPI driver"
+	help
+	  Enable the Loongson SPI driver, used by all series of Loongson processors
+
 config SANDBOX_SPI
 	bool "Sandbox SPI driver"
 	depends on SANDBOX && DM
