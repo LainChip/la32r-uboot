@@ -246,6 +246,14 @@ wr_done:
 	jalr	t9
 	 nop
 # endif
+#else
+	la t1, kseg1_kseg0 #####
+	li t2, ~0x20000000  ###
+	and t9, t1, t2    #kseg1 -> kseg0
+	jr t9              ###
+	nop                #####
+
+kseg1_kseg0:
 #endif
 
 #ifndef CONFIG_MIPS_INIT_STACK_IN_SRAM
