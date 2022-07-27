@@ -45,6 +45,13 @@ config SPL_DM_MMC
 	  as EXT4 and FAT.
 
 if MMC
+config MMC_OCSDC
+	bool "OpenCores Wishbone SD Card Controller"
+	depends on BLK && DM_MMC
+	depends on OF_CONTROL
+	help
+          This selects Wishbone SD Card controller, the source of which
+          can be found on https://github.com/mczerski/SD-card-controller
 
 config ARM_PL180_MMCI
 	bool "ARM AMBA Multimedia Card Interface and compatible support"
