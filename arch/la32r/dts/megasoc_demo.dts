@@ -1,0 +1,105 @@
+/dts-v1/;
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+	compatible = "megasoc,demo";
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		cpu@0 {
+			device_type = "cpu";
+			compatible = "mips,m14Kc";
+			clocks	= <&ext>;
+			reg = <0>;
+		};
+	};
+
+	ext: ext {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+	};
+	
+	memory: memory@0 {
+		device_type = "memory";
+		reg = <0x0 0x4000000>;
+	};
+
+	cpuintc: interrupt-controller@bd000000 {
+		#address-cells = <0>;
+		#interrupt-cells = <1>;
+        reg = <0xbd000000 0x20>;
+		interrupt-controller;
+		compatible = "mti,cpu-interrupt-controller";
+	};
+
+	bus_clk: bus_clk {
+		compatible = "fixed-clock";
+        clock-frequency = <166666666>;
+		#clock-cells = <0>;
+	};
+
+	aliases {
+		console = &serial0;
+        serial = &serial0;
+        eth = &axi_ethernetlite;
+        mmc0 = &ocsdc0;
+        spi0 = &spi_flash;
+	};
+
+	serial0: serial@bfe40000 {
+		compatible = "ns16550";
+		reg = <0xbfe40000 0x1000>;
+        reg-offset = <0>;
+        reg-shift = <0>;
+        clocks = <&bus_clk>;
+        current-speed = <230400>;
+	};
+
+	ocsdc0: ocsdc@bfe10000 {
+		compatible = "opencores,ocsdc";
+		reg = <0xbfe10000 0x1000>;
+        clocks = <&bus_clk>;
+	};
+
+	axi_ethernetlite: ethernet@bff00000 {
+		compatible = "xlnx,xps-ethernetlite-1.00.a";
+		device_type = "network";
+		local-mac-address = [19 98 00 01 00 29];
+		phy-handle = <&phy0>;
+		reg = <0xbff00000 0x10000>;
+		xlnx,duplex = <0x1>;
+		xlnx,include-global-buffers = <0x1>;
+		xlnx,include-internal-loopback = <0x0>;
+		xlnx,include-mdio = <0x1>;
+		xlnx,instance = "axi_ethernetlite_inst";
+		xlnx,rx-ping-pong = <0x1>;
+		xlnx,s-axi-id-width = <0x1>;
+		xlnx,tx-ping-pong = <0x1>;
+		xlnx,use-internal = <0x0>;
+		mdio {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				phy0: phy@1 {
+						device_type = "ethernet-phy";
+						reg = <1>;
+				} ;
+		} ;
+	};
+
+        spi_flash: spi@bc040000 {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                compatible = "loongson,spi";
+                reg = <0xbfe80000 0x1000>;
+                clocks = <&bus_clk>;
+
+                spi-flash@0 {
+                    compatible = "spi-flash", "jedec,spi-nor";
+                    reg = <0>;
+                    spi-max-frequency = <30000000>;
+                };
+        };
+};
+

@@ -41,6 +41,11 @@ config MIPS
 	select HAVE_PRIVATE_LIBGCC
 	select SUPPORT_OF_CONTROL
 
+config LA32R
+	bool "LA32R architecture"
+	select HAVE_ARCH_IOREMAP
+	select SUPPORT_OF_CONTROL
+
 config NDS32
 	bool "NDS32 architecture"
 	select SUPPORT_OF_CONTROL
@@ -277,6 +282,7 @@ source "arch/arm/Kconfig"
 source "arch/m68k/Kconfig"
 source "arch/microblaze/Kconfig"
 source "arch/mips/Kconfig"
+source "arch/la32r/Kconfig"
 source "arch/nds32/Kconfig"
 source "arch/nios2/Kconfig"
 source "arch/powerpc/Kconfig"

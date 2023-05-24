@@ -27,7 +27,8 @@ uint64_t notrace get_ticks(void)
 ulong get_timer(ulong base)
 {
         unsigned long now = timer_get_us();
-	do_div(now, 1000);
+	// do_div((&now), 1000);
+        now /= 1000;
 	return now - base;
 }
 

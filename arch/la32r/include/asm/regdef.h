@@ -11,6 +11,9 @@
 
 #include <asm/sgidefs.h>
 
+/*
+ * Symbolic register names for 32 bit ABI
+ */
 #define zero	$r0	/* wired zero */
 #define ra	$r1	/* return address */
 #define tp	$r2

@@ -204,6 +204,7 @@ hostprogs-y += spl_size_limit
 endif
 
 hostprogs-$(CONFIG_MIPS) += mips-relocs
+hostprogs-$(CONFIG_LA32R) += la32r-relocs
 
 # We build some files with extra pedantic flags to try to minimize things
 # that won't build on some weird host compiler -- though there are lots of

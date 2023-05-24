@@ -18,6 +18,7 @@
 /kwboot
 /lib/
 /mips-relocs
+/la32r-relocs
 /mkenvimage
 /mkexynosspl
 /mkimage

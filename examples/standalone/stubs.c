@@ -255,6 +255,22 @@ static void **jt;
 #else
 #error Unsupported Xtensa ABI
 #endif
+#elif defined(CONFIG_LA32R)
+/*
+ * k0 ($26) holds the pointer to the global_data; t9 ($25) is a call-
+ * clobbered register that is also used to set gp ($26). Note that the
+ * jr instruction also executes the instruction immediately following
+ * it; however, GCC/mips generates an additional `nop' after each asm
+ * statement
+ */
+#define EXPORT_FUNC(f, a, x, ...) \
+	asm volatile (			\
+"	.globl " #x "\n"		\
+#x ":\n"				\
+"	ld.w	$r20, $r21, %0\n"		\
+"	ld.w	$r20, $r20, %1\n"		\
+"	jr		$r20\n"			\
+	: : "i"(offsetof(gd_t, jt)), "i"(FO(x)) : "t8");
 #else
 /*"	addi	$sp, $sp, -24\n"	\
 "	br	$r16\n"			\*/
