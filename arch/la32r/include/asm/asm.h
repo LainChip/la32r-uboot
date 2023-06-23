@@ -52,9 +52,8 @@ symbol:
  */
 #define LEAF(symbol)					\
 		.globl	symbol;				\
-		.align	2;				\
 		.type	symbol, @function;		\
-		.section .text.symbol, "x";
+symbol:
 
 /*
  * NESTED - declare nested routine entry point
