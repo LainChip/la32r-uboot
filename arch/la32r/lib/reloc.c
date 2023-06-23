@@ -53,7 +53,29 @@ static unsigned long read_uint(uint8_t **buf)
 
 	return val;
 }
+static int rela_stack_push(long stack_value, long *rela_stack, size_t *rela_stack_top)
+{
+	if (*rela_stack_top >= 16) {
+		prinf("rela_stack_top: %d\n",*rela_stack_top);
+		panic("rela stack push overflow")
+	}
 
+	rela_stack[(*rela_stack_top)++] = stack_value;
+
+	return 0;
+}
+
+static int rela_stack_pop(long *stack_value, long *rela_stack, size_t *rela_stack_top)
+{
+	if (*rela_stack_top == 0) {
+		prinf("rela_stack_top: %d\n",*rela_stack_top);
+		panic("rela stack pop overflow")
+	}
+
+	*stack_value = rela_stack[--(*rela_stack_top)];
+
+	return 0;
+}
 /**
  * apply_reloc() - Apply a single relocation
  * @type: the type of reloc (R_MIPS_*)
@@ -64,30 +86,32 @@ static unsigned long read_uint(uint8_t **buf)
  * intentionally simple, and does the bare minimum needed to fixup the
  * relocated U-Boot - in particular, it does not check for overflows.
  */
-static void apply_reloc(unsigned int type, void *addr, long off)
+static void apply_reloc(unsigned int type, void *addr, long off, long* rela_stack, size_t *rela_stack_top)
 {
 	uint32_t u32;
 
 	switch (type) {
-	case R_MIPS_26:
-		u32 = *(uint32_t *)addr;
-		u32 = (u32 & GENMASK(31, 26)) |
-		      ((u32 + (off >> 2)) & GENMASK(25, 0));
-		*(uint32_t *)addr = u32;
-		break;
+	// case R_MIPS_26:
+	// 	u32 = *(uint32_t *)addr;
+	// 	u32 = (u32 & GENMASK(31, 26)) |
+	// 	      ((u32 + (off >> 2)) & GENMASK(25, 0));
+	// 	*(uint32_t *)addr = u32;
+	// 	break;
 
-	case R_MIPS_32:
-		*(uint32_t *)addr += off;
-		break;
+	// case R_MIPS_32:
+	// 	*(uint32_t *)addr += off;
+	// 	break;
 
-	case R_MIPS_64:
-		*(uint64_t *)addr += off;
-		break;
+	// case R_MIPS_64:
+	// 	*(uint64_t *)addr += off;
+	// 	break;
 
-	case R_MIPS_HI16:
-		*(uint32_t *)addr += off >> 16;
+	// case R_MIPS_HI16:
+	// 	*(uint32_t *)addr += off >> 16;
+	// 	break;
+	case R_LARCH_SOP_PUSH_PCREL:
+		
 		break;
-
 	default:
 		panic("Unhandled reloc type %u\n", type);
 	}
@@ -110,6 +134,9 @@ void relocate_code(ulong start_addr_sp, gd_t *new_gd, ulong relocaddr)
 	uint8_t *buf, *bss_start;
 	unsigned int type;
 	long off;
+	long rela_stack[16];
+	size_t rela_stack_top = 0;
+
 
 	/*
 	 * Ensure that we're relocating by an offset which is a multiple of
@@ -118,8 +145,10 @@ void relocate_code(ulong start_addr_sp, gd_t *new_gd, ulong relocaddr)
 	 * space in the U-Boot binary & complexity in handling them.
 	 */
 	off = relocaddr - (unsigned long)__text_start;
-	if (off & 0xffff)
+	if (off & 0xfff) {
+		printf("off: 0x%08x\n", off);
 		panic("Mis-aligned relocation\n");
+	}
 
 	/* Copy U-Boot to RAM */
 	length = __image_copy_end - __text_start;
@@ -134,7 +163,7 @@ void relocate_code(ulong start_addr_sp, gd_t *new_gd, ulong relocaddr)
 			break;
 
 		addr += read_uint(&buf) << 2;
-		apply_reloc(type, (void *)addr, off);
+		apply_reloc(type, (void *)addr, off, rela_stack, &rela_stack_top);
 	}
 
 	/* Ensure the icache is coherent */

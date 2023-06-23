@@ -54,7 +54,7 @@
 .macro setup_stack_gd
 li.w	t0, -16
 // PTR_LI	t1, CONFIG_SYS_INIT_SP_ADDR
-li.w	t1, (CONFIG_SYS_INIT_SP_ADDR & 0x1fffffff)
+li.w	t1, CONFIG_SYS_INIT_SP_ADDR
 and		sp, t1, t0		# force 16 byte alignment
 addi.w	sp, sp, -GD_SIZE		# reserve space for gd
 and		sp, sp, t0		# force 16 byte alignment
@@ -94,13 +94,20 @@ reset:
 	li.w      t0, 0x0c000380 
     csrwr   t0, csr_eentry 
 
-    li.w      t1, 0xa0000009  // uncacheed window
+    li.w      t1, 0x80000009  // cacheed window, cache attribute is set after 
     csrwr   t1, csr_dmw0 
-    li.w      t1, 0x00000009  // cacheed window, cache attribute is set after 
+    li.w      t1, 0x00000009  // uncacheed window, temporary
     csrwr   t1, csr_dmw1
     li.w      t1, 0x10 
     li.w      t2, 0x18 
     csrxchg t1, t2, csr_crmd  //enable address translation
+
+	la		t0, cseg
+	jr		t0
+cseg:
+    li.w      t1, 0xa0000009  // uncacheed window
+    csrwr   t1, csr_dmw1
+	
 
 // 	/* Set up initial stack and global data */
 	setup_stack_gd
