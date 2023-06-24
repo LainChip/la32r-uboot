@@ -100,6 +100,14 @@
 bool is_64, is_be;
 uint64_t text_base;
 
+uint32_t type_freq[256];
+
+void print_type_freq() {
+	for(int i = 0 ; i < 256 ; i ++) {
+		if(type_freq[i]) printf("freq %d : %d\n",i,type_freq[i]);
+	}
+}
+
 struct mips_reloc {
 	uint8_t type;
 	uint64_t offset;
@@ -112,19 +120,20 @@ static int add_reloc(unsigned int type, uint64_t off)
 	size_t new_sz;
 
 	switch (type) {
-	case R_MIPS_NONE:
-	case R_MIPS_LO16:
-	case R_MIPS_PC16:
-	case R_MIPS_HIGHER:
-	case R_MIPS_HIGHEST:
-	case R_MIPS_PC21_S2:
-	case R_MIPS_PC26_S2:
-		/* Skip these relocs */
-		return 0;
-
-	default:
+	case R_LARCH_32:
 		break;
+	// case R_MIPS_LO16:
+	// case R_MIPS_PC16:
+	// case R_MIPS_HIGHER:
+	// case R_MIPS_HIGHEST:
+	// case R_MIPS_PC21_S2:
+	// case R_MIPS_PC26_S2:
+	// 	/* Skip these relocs */
+	// 	return 0;
+	default:
+		return 0;
 	}
+	type_freq[type] += 1;
 
 	if (relocs_idx == relocs_sz) {
 		new_sz = relocs_sz ? relocs_sz * 2 : 128;
@@ -162,7 +171,7 @@ static int parse_mips32_rel(const void *_rel)
 
 static int parse_mips32_rela(const void *_rel)
 {
-	const Elf32_Rel *rel = _rel;
+	const Elf32_Rela *rel = _rel;
 	uint32_t off, type;
 
 	off = is_be ? be32toh(rel->r_offset) : le32toh(rel->r_offset);
@@ -408,6 +417,7 @@ int main(int argc, char *argv[])
 	/* Ensure the relocs didn't overflow the .rel section */
 	rel_size = shdr_field(i_rel_shdr, sh_size);
 	rel_actual_size = buf - buf_start;
+	printf("rel_size is 0x%x, actual is 0x%x\n",rel_size,rel_actual_size);
 	if (rel_actual_size > rel_size) {
 		fprintf(stderr, "Relocations overflow available space of 0x%lx (required 0x%lx)!\n",
 			rel_size, rel_actual_size);
@@ -423,6 +433,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Failed to msync: %d\n", errno);
 		goto out_free_relocs;
 	}
+	print_type_freq();
 
 out_free_relocs:
 	free(relocs);

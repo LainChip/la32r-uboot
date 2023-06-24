@@ -57,7 +57,7 @@ static int rela_stack_push(long stack_value, long *rela_stack, size_t *rela_stac
 {
 	if (*rela_stack_top >= 16) {
 		prinf("rela_stack_top: %d\n",*rela_stack_top);
-		panic("rela stack push overflow")
+		panic("rela stack push overflow");
 	}
 
 	rela_stack[(*rela_stack_top)++] = stack_value;
@@ -69,7 +69,7 @@ static int rela_stack_pop(long *stack_value, long *rela_stack, size_t *rela_stac
 {
 	if (*rela_stack_top == 0) {
 		prinf("rela_stack_top: %d\n",*rela_stack_top);
-		panic("rela stack pop overflow")
+		panic("rela stack pop overflow");
 	}
 
 	*stack_value = rela_stack[--(*rela_stack_top)];
@@ -109,8 +109,8 @@ static void apply_reloc(unsigned int type, void *addr, long off, long* rela_stac
 	// case R_MIPS_HI16:
 	// 	*(uint32_t *)addr += off >> 16;
 	// 	break;
-	case R_LARCH_SOP_PUSH_PCREL:
-		
+	case R_LARCH_32:
+		*(uint32_t *)addr += off;
 		break;
 	default:
 		panic("Unhandled reloc type %u\n", type);
@@ -159,7 +159,7 @@ void relocate_code(ulong start_addr_sp, gd_t *new_gd, ulong relocaddr)
 	addr = relocaddr;
 	while (true) {
 		type = read_uint(&buf);
-		if (type == R_MIPS_NONE)
+		if (type == 0)
 			break;
 
 		addr += read_uint(&buf) << 2;
