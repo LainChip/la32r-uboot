@@ -247,7 +247,7 @@ void relocate_code(ulong start_addr_sp, gd_t *new_gd, ulong relocaddr)
 
 	/* Jump to the relocated U-Boot */
 	asm volatile(
-		       "add.w	$r3, %0, $r0\n"
+		"	add.w	$r3, %0, $r0\n"
 		"	add.w	$r4, %1, $r0\n"
 		"	add.w	$r5, %2, $r0\n"
 		"	add.w	$r1, $r0, $r0\n"

@@ -40,26 +40,37 @@ static void run_preboot_environment_command(void)
 /* We come here after U-Boot is initialised and ready to process commands */
 void main_loop(void)
 {
+	int dbg_cnt = 0;
 	const char *s;
+	printf("main_loop: %d\n", ++dbg_cnt);
 
 	bootstage_mark_name(BOOTSTAGE_ID_MAIN_LOOP, "main_loop");
+	printf("main_loop: %d\n", ++dbg_cnt);
 
 	if (IS_ENABLED(CONFIG_VERSION_VARIABLE))
 		env_set("ver", version_string);  /* set version variable */
 
+	printf("main_loop: %d\n", ++dbg_cnt);
 	cli_init();
+	printf("main_loop: %d\n", ++dbg_cnt);
 
 	run_preboot_environment_command();
+	printf("main_loop: %d\n", ++dbg_cnt);
 
 	if (IS_ENABLED(CONFIG_UPDATE_TFTP))
 		update_tftp(0UL, NULL, NULL);
+	printf("main_loop: %d\n", ++dbg_cnt);
 
 	s = bootdelay_process();
+	printf("main_loop: %d\n", ++dbg_cnt);
 	if (cli_process_fdt(&s))
 		cli_secure_boot_cmd(s);
+	printf("main_loop: %d %s\n", ++dbg_cnt,s);
 
 	autoboot_command(s);
+	printf("main_loop: %d", ++dbg_cnt);
 
 	cli_loop();
+	printf("main_loop: %d", ++dbg_cnt);
 	panic("No CLI available");
 }

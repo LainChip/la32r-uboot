@@ -14,59 +14,54 @@
 #include <asm/mipsregs.h>
 #include <asm/addrspace.h>
 #include <asm/system.h>
+#include <asm/traps.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
-static void show_regs(const struct pt_regs *regs)
+static void show_regs(const struct Trapframe *regs)
 {
-	const int field = 2 * sizeof(unsigned long);
-	unsigned int cause = regs->cp0_cause;
-	unsigned int exccode;
-	int i;
 
 	/*
 	 * Saved main processor registers
 	 */
-	for (i = 0; i < 32; ) {
+	for (int i = 0; i < 32; ) {
 		if ((i % 4) == 0)
 			printf("$%2d   :", i);
 		if (i == 0)
-			printf(" %0*lx", field, 0UL);
-		else if (i == 26 || i == 27)
-			printf(" %*s", field, "");
+			printf(" %0lx",  0UL);
 		else
-			printf(" %0*lx", field, regs->regs[i]);
+			printf(" %0lx", regs->regs[i]);
 
 		i++;
 		if ((i % 4) == 0)
 			puts("\n");
 	}
 
-	printf("Hi    : %0*lx\n", field, regs->hi);
-	printf("Lo    : %0*lx\n", field, regs->lo);
+	// printf("Hi    : %0*lx\n", field, regs->hi);
+	// printf("Lo    : %0*lx\n", field, regs->lo);
 
-	/*
-	 * Saved cp0 registers
-	 */
-	printf("epc   : %0*lx (text %0*lx)\n", field, regs->cp0_epc,
-	       field, regs->cp0_epc - gd->reloc_off);
-	printf("ra    : %0*lx (text %0*lx)\n", field, regs->regs[31],
-	       field, regs->regs[31] - gd->reloc_off);
+	// /*
+	//  * Saved cp0 registers
+	//  */
+	// printf("epc   : %0*lx (text %0*lx)\n", field, regs->cp0_epc,
+	//        field, regs->cp0_epc - gd->reloc_off);
+	// printf("ra    : %0*lx (text %0*lx)\n", field, regs->regs[31],
+	//        field, regs->regs[31] - gd->reloc_off);
 
-	printf("Status: %08x\n", (uint32_t) regs->cp0_status);
+	// printf("Status: %08x\n", (uint32_t) regs->cp0_status);
 
-	exccode = (cause & CAUSEF_EXCCODE) >> CAUSEB_EXCCODE;
-	printf("Cause : %08x (ExcCode %02x)\n", cause, exccode);
+	// exccode = (cause & CAUSEF_EXCCODE) >> CAUSEB_EXCCODE;
+	// printf("Cause : %08x (ExcCode %02x)\n", cause, exccode);
 
-	if (1 <= exccode && exccode <= 5)
-		printf("BadVA : %0*lx\n", field, regs->cp0_badvaddr);
+	// if (1 <= exccode && exccode <= 5)
+	// 	printf("BadVA : %0*lx\n", field, regs->cp0_badvaddr);
 
 	// printf("PrId  : %08x\n", read_c0_prid());
 }
 
-void do_reserved(const struct pt_regs *regs)
+void do_reserved(const struct Trapframe *regs)
 {
-	puts("\nOoops:\n");
+	printf("\nOoops LA32R Processor cannot handle exception code %x (subcode: %x)\n",(regs->estat >> 16) & 0x3f,(regs->estat >> 22) & 0x1ff);
 	show_regs(regs);
 	hang();
 }

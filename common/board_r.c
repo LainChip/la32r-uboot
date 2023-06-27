@@ -857,22 +857,22 @@ void board_init_r(gd_t *new_gd, ulong dest_addr)
 #ifdef CONFIG_NEEDS_MANUAL_RELOC
 	int i;
 #endif
-	printf("board_init_r 0-1\n");
+	debug("board_init_r 0-1\n");
 
 #if !defined(CONFIG_X86) && !defined(CONFIG_ARM) && !defined(CONFIG_ARM64)
 	gd = new_gd;
 #endif
 	gd->flags &= ~GD_FLG_LOG_READY;
-	printf("board_init_r 0-2\n");
+	debug("board_init_r 0-2\n");
 
 #ifdef CONFIG_NEEDS_MANUAL_RELOC
 	for (i = 0; i < ARRAY_SIZE(init_sequence_r); i++)
 		init_sequence_r[i] += gd->reloc_off;
 #endif
-	printf("board_init_r 1\n");
+	debug("board_init_r 1\n");
 	if (initcall_run_list(init_sequence_r))
 		hang();
-	printf("board_init_r 2\n");
+	debug("board_init_r 2\n");
 
 	/* NOTREACHED - run_main_loop() does not return */
 	hang();
