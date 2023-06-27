@@ -30,14 +30,14 @@ static inline int initcall_run_list(const init_fnc_t init_sequence[])
 #ifdef CONFIG_EFI_APP
 		reloc_ofs = (unsigned long)image_base;
 #endif
-		printf("initcall: %p", (char *)*init_fnc_ptr - reloc_ofs);
+		debug("initcall: %p", (char *)*init_fnc_ptr - reloc_ofs);
 		if (reloc_ofs)
-			printf(" (relocated to %p)\n", (char *)*init_fnc_ptr);
+			debug(" (relocated to %p)\n", (char *)*init_fnc_ptr);
 		else
-			printf("\n");
+			debug("\n");
 		ret = (*init_fnc_ptr)();
 		if (ret) {
-			printf("initcall sequence %p failed at call %p (err=%d)\n",
+			debug("initcall sequence %p failed at call %p (err=%d)\n",
 			       init_sequence,
 			       (char *)*init_fnc_ptr - reloc_ofs, ret);
 			return -1;

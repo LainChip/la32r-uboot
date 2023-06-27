@@ -440,28 +440,20 @@ static int should_load_env(void)
 
 static int initr_env(void)
 {
-	printf("initr_env: 1\n");
 	/* initialize environment */
 	if (should_load_env()) {
-		printf("initr_env: 1-1\n");
 		env_relocate();
-		printf("initr_env: 1-2\n");
 	}
 	else {
-		printf("initr_env: 1-3\n");
 		set_default_env(NULL, 0);
-		printf("initr_env: 1-4\n");
 	}
-	printf("initr_env: 2\n");
 #ifdef CONFIG_OF_CONTROL
 	env_set_hex("fdtcontroladdr",
 		    (unsigned long)map_to_sysmem(gd->fdt_blob));
 #endif
 
-	printf("initr_env: 3\n");
 	/* Initialize from environment */
 	load_addr = env_get_ulong("loadaddr", 16, load_addr);
-	printf("initr_env: 4\n");
 
 	return 0;
 }
@@ -645,6 +637,7 @@ static int run_main_loop(void)
 	sandbox_main_loop_init();
 #endif
 	/* main_loop() can return to retry autoboot, if so just run it again */
+	printf("in main loop\n");
 	for (;;)
 		main_loop();
 	return 0;

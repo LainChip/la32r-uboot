@@ -88,26 +88,26 @@ static int rela_stack_pop(long *stack_value, long *rela_stack, size_t *rela_stac
  * @addend: the relocation addend
  *
  */
-static void apply_reloc(unsigned int type, void *addr, long off, long addend, long* rela_stack, size_t *rela_stack_top)
+static void apply_reloc(unsigned int type, void *addr, long off, long sym, long* rela_stack, size_t *rela_stack_top)
 {
 	uint32_t u32;
 	int op1,op2;
 
 	switch (type) {
 	case R_LARCH_32:
-		*(uint32_t *)addr = (*(uint32_t *)addr) + off;
+		*(uint32_t *)addr = sym + off;
 		break;
 	case R_LARCH_SOP_PUSH_PCREL:
-		rela_stack_push(addend,rela_stack,rela_stack_top);
+		rela_stack_push(sym - (uint32_t)addr,rela_stack,rela_stack_top);
 		break;
 	case R_LARCH_SOP_PUSH_ABSOLUTE:
-		rela_stack_push(addend - off + addr,rela_stack,rela_stack_top);
+		rela_stack_push(sym,rela_stack,rela_stack_top);
 		break;
 	case R_LARCH_SOP_PUSH_GPREL:
 		rela_stack_push(0,rela_stack,rela_stack_top);
 		break;
 	case R_LARCH_SOP_PUSH_PLT_PCREL:
-		rela_stack_push(addend,rela_stack,rela_stack_top);
+		rela_stack_push(sym - (uint32_t)addr,rela_stack,rela_stack_top);
 		break;
 	case R_LARCH_SOP_SUB:
 		rela_stack_pop(&op2,rela_stack,rela_stack_top);
@@ -197,7 +197,7 @@ void relocate_code(ulong start_addr_sp, gd_t *new_gd, ulong relocaddr)
 	unsigned long addr, length, bss_len;
 	uint8_t *buf, *bss_start;
 	unsigned int type;
-	long off, addend;
+	long off, sym;
 	long rela_stack[16];
 	size_t rela_stack_top = 0;
 
@@ -221,14 +221,20 @@ void relocate_code(ulong start_addr_sp, gd_t *new_gd, ulong relocaddr)
 	/* Now apply relocations to the copy in RAM */
 	buf = __rel_start;
 	addr = relocaddr;
+	uint32_t *got = read_uint(&buf)+ off;
+	uint32_t got_size = read_uint(&buf);
+	printf("got located in %x, original %x, size %d\n",got,(char *)got - off,got_size);
+	for(int i = 0 ; i < got_size ; i++) {
+		got[i] += off;
+	}
 	while (true) {
 		type = read_uint(&buf);
 		if (type == 0)
 			break;
 		addr += read_uint(&buf) << 2;
-		addend = read_uint(&buf);
-		// printf("%x, %d, %d\n",addr,type,addend);
-		apply_reloc(type, (void *)addr, off, addend, rela_stack, &rela_stack_top);
+		sym = read_uint(&buf);
+		// printf("%x, %d, %d\n",addr,type,sym);
+		apply_reloc(type, (void *)addr, off, sym, rela_stack, &rela_stack_top);
 	}
 
 	/* Ensure the icache is coherent */

@@ -226,18 +226,15 @@ static int _do_env_set(int flag, int argc, char * const argv[], int env_flag)
 	char  *name, *value, *s;
 	ENTRY e, *ep;
 
-	printf("_do_env_set: 1\n");
-	printf("Initial value for argc=%d\n", argc);
+	debug("Initial value for argc=%d\n", argc);
 
 #if CONFIG_IS_ENABLED(CMD_NVEDIT_EFI)
 	if (argc > 1 && argv[1][0] == '-' && argv[1][1] == 'e')
 		return do_env_set_efi(NULL, flag, --argc, ++argv);
 #endif
-	printf("_do_env_set: 2\n");
 
 	while (argc > 1 && **(argv + 1) == '-') {
 		char *arg = *++argv;
-		printf("_do_env_set: 3\n");
 
 		--argc;
 		while (*++arg) {
@@ -250,7 +247,7 @@ static int _do_env_set(int flag, int argc, char * const argv[], int env_flag)
 			}
 		}
 	}
-	printf("Final value for argc=%d\n", argc);
+	debug("Final value for argc=%d\n", argc);
 	name = argv[1];
 
 	if (strchr(name, '=')) {
@@ -273,9 +270,7 @@ static int _do_env_set(int flag, int argc, char * const argv[], int env_flag)
 	for (i = 2, len = 0; i < argc; ++i)
 		len += strlen(argv[i]) + 1;
 
-	printf("_do_env_set: 4\n");
 	value = malloc(len);
-	printf("_do_env_set: 5\n");
 	if (value == NULL) {
 		printf("## Can't malloc %d bytes\n", len);
 		return 1;
@@ -292,11 +287,8 @@ static int _do_env_set(int flag, int argc, char * const argv[], int env_flag)
 
 	e.key	= name;
 	e.data	= value;
-	printf("_do_env_set: 6\n");
 	hsearch_r(e, ENTER, &ep, &env_htab, env_flag);
-	printf("_do_env_set: 6-1\n");
 	free(value);
-	printf("_do_env_set: 7\n");
 	if (!ep) {
 		printf("## Error inserting \"%s\" variable, errno=%d\n",
 			name, errno);
@@ -310,11 +302,9 @@ int env_set(const char *varname, const char *varvalue)
 {
 	const char * const argv[4] = { "setenv", varname, varvalue, NULL };
 
-	printf("env_set: 1");
 	/* before import into hashtable */
 	if (!(gd->flags & GD_FLG_ENV_READY))
 		return 1;
-	printf("env_set: 2");
 
 	if (varvalue == NULL || varvalue[0] == '\0')
 		return _do_env_set(0, 2, (char * const *)argv, H_PROGRAMMATIC);
@@ -346,13 +336,10 @@ int env_set_ulong(const char *varname, ulong value)
  */
 int env_set_hex(const char *varname, ulong value)
 {
-	printf("env_set_hex: 1");
 	char str[17];
 
 	sprintf(str, "%lx", value);
-	printf("env_set_hex: 2");
 	int ret = env_set(varname, str);
-	printf("env_set_hex: 3");
 	return ret;
 }
 

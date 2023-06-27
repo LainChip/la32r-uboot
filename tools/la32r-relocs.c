@@ -105,6 +105,8 @@
 bool is_64, is_be;
 uint64_t text_base;
 
+Elf32_Sym *sym32;
+Elf64_Sym *sym64;
 uint32_t type_freq[256];
 
 void print_type_freq()
@@ -167,7 +169,7 @@ static int add_reloc(unsigned int type, uint32_t off, uint32_t addend, uint32_t 
 	relocs[relocs_idx++] = (struct mips_reloc){
 		.type = type,
 		.offset = off,
-		.addend = sym
+		.addend = sym + addend
 	};
 
 	return 0;
@@ -196,6 +198,7 @@ static int parse_mips32_rela(const void *_rel)
 	sym = ELF32_R_SYM(type);
 	type = ELF32_R_TYPE(type);
 	off = is_be ? be32toh(rel->r_offset) : le32toh(rel->r_offset);
+	sym = sym32[sym].st_value;
 	if ((off >= 0x9c008a70 && off <= 0x9c008a74))
 	{
 		printf("off is: 0x%x, added is: 0x%x, type is %d, sym is %x\n", off,rel->r_addend, type, sym);
@@ -248,7 +251,7 @@ int main(int argc, char *argv[])
 	const Elf32_Ehdr *ehdr32;
 	const Elf64_Ehdr *ehdr64;
 	uintptr_t sh_offset;
-	Elf32_Shdr *shdr32;
+	Elf32_Shdr *shdr32,*shdr_got;
 	Elf64_Shdr *shdr64;
 	struct stat st;
 	int err, fd;
@@ -346,6 +349,20 @@ int main(int argc, char *argv[])
 	for (i = 0; i < ehdr_field(e_shnum); i++)
 	{
 		sh_name = shstr(shdr_field(i, sh_name));
+
+		if (!strcmp(sh_name, ".symtab"))
+		{
+			sym32 = elf + (unsigned long)shdr_field(i, sh_offset);
+			sym64 = elf + (unsigned long)shdr_field(i, sh_offset);
+			printf("sym is located in %x.\n",sym32);
+			continue;
+		}
+
+		if(!strcmp(sh_name, ".got")) {
+			shdr_got = shdr32 + i;
+			printf("got is located in %x with size %d.\n",shdr_got->sh_addr,shdr_got->sh_size);
+			continue;
+		}
 
 		if (!strcmp(sh_name, ".data.reloc"))
 		{
@@ -456,6 +473,9 @@ int main(int argc, char *argv[])
 
 	/* Write the relocations to the .rel section */
 	buf = buf_start = elf + shdr_field(i_rel_shdr, sh_offset);
+	output_uint(&buf, shdr_got->sh_addr); // GOPT offset
+	output_uint(&buf, shdr_got->sh_size / 4); // GOPT size in word
+	
 	for (i = 0; i < relocs_idx; i++)
 	{
 		output_uint(&buf, relocs[i].type);

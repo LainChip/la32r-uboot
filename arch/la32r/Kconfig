@@ -30,8 +30,8 @@ config SYS_DCACHE_LINE_SIZE
 
 config LA32R_RELOCATION_TABLE_SIZE
 	hex "Relocation table size"
-	range 0x100 0x40000
-	default "0x40000"
+	range 0x100 0x42000
+	default "0x42000"
 	---help---
 	  A table of relocation data will be appended to the U-Boot binary
 	  and parsed in relocate_code() to fix up all offsets in the relocated
