@@ -637,7 +637,6 @@ static int run_main_loop(void)
 	sandbox_main_loop_init();
 #endif
 	/* main_loop() can return to retry autoboot, if so just run it again */
-	printf("in main loop\n");
 	for (;;)
 		main_loop();
 	return 0;
@@ -849,7 +848,6 @@ void board_init_r(gd_t *new_gd, ulong dest_addr)
 	 * TODO(sjg@chromium.org): Consider doing this for all archs, or
 	 * dropping the new_gd parameter.
 	 */
-	printf("board_init_r 0\n");
 #if CONFIG_IS_ENABLED(X86_64)
 	arch_setup_gd(new_gd);
 #endif
@@ -857,13 +855,11 @@ void board_init_r(gd_t *new_gd, ulong dest_addr)
 #ifdef CONFIG_NEEDS_MANUAL_RELOC
 	int i;
 #endif
-	debug("board_init_r 0-1\n");
 
 #if !defined(CONFIG_X86) && !defined(CONFIG_ARM) && !defined(CONFIG_ARM64)
 	gd = new_gd;
 #endif
 	gd->flags &= ~GD_FLG_LOG_READY;
-	debug("board_init_r 0-2\n");
 
 #ifdef CONFIG_NEEDS_MANUAL_RELOC
 	for (i = 0; i < ARRAY_SIZE(init_sequence_r); i++)
