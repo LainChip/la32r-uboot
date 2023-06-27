@@ -458,7 +458,7 @@ static int reserve_uboot(void)
 		 */
 		gd->relocaddr -= gd->mon_len;
 		gd->relocaddr &= ~(4096 - 1);
-	#if defined(CONFIG_E500) || defined(CONFIG_MIPS)
+	#if defined(CONFIG_E500) || defined(CONFIG_MIPS) || defined(CONFIG_LA32R)
 		/* round down to next 64 kB limit so that IVPR stays aligned */
 		gd->relocaddr &= ~(65536 - 1);
 	#endif
@@ -581,7 +581,7 @@ static int display_new_sp(void)
 	return 0;
 }
 
-#if defined(CONFIG_M68K) || defined(CONFIG_MIPS) || defined(CONFIG_PPC) || \
+#if defined(CONFIG_M68K) || defined(CONFIG_MIPS) || defined(CONFIG_LA32R) || defined(CONFIG_PPC) || \
 	defined(CONFIG_SH)
 static int setup_board_part1(void)
 {
@@ -951,7 +951,7 @@ static const init_fnc_t init_sequence_f[] = {
 	reserve_stacks,
 	dram_init_banksize,
 	show_dram_config,
-#if defined(CONFIG_M68K) || defined(CONFIG_MIPS) || defined(CONFIG_PPC) || \
+#if defined(CONFIG_M68K) || defined(CONFIG_MIPS)  || defined(CONFIG_LA32R) || defined(CONFIG_PPC) || \
 	defined(CONFIG_SH)
 	setup_board_part1,
 #endif

@@ -19,68 +19,73 @@
 
 #include <asm/relocs.h>
 
-#define hdr_field(pfx, idx, field) ({				\
-	uint64_t _val;						\
-	unsigned int _size;					\
-								\
-	if (is_64) {						\
-		_val = pfx##hdr64[idx].field;			\
-		_size = sizeof(pfx##hdr64[0].field);		\
-	} else {						\
-		_val = pfx##hdr32[idx].field;			\
-		_size = sizeof(pfx##hdr32[0].field);		\
-	}							\
-								\
-	switch (_size) {					\
-	case 1:							\
-		break;						\
-	case 2:							\
-		_val = is_be ? be16toh(_val) : le16toh(_val);	\
-		break;						\
-	case 4:							\
-		_val = is_be ? be32toh(_val) : le32toh(_val);	\
-		break;						\
-	case 8:							\
-		_val = is_be ? be64toh(_val) : le64toh(_val);	\
-		break;						\
-	}							\
-								\
-	_val;							\
+#define hdr_field(pfx, idx, field) ({                 \
+	uint64_t _val;                                    \
+	unsigned int _size;                               \
+                                                      \
+	if (is_64)                                        \
+	{                                                 \
+		_val = pfx##hdr64[idx].field;                 \
+		_size = sizeof(pfx##hdr64[0].field);          \
+	}                                                 \
+	else                                              \
+	{                                                 \
+		_val = pfx##hdr32[idx].field;                 \
+		_size = sizeof(pfx##hdr32[0].field);          \
+	}                                                 \
+                                                      \
+	switch (_size)                                    \
+	{                                                 \
+	case 1:                                           \
+		break;                                        \
+	case 2:                                           \
+		_val = is_be ? be16toh(_val) : le16toh(_val); \
+		break;                                        \
+	case 4:                                           \
+		_val = is_be ? be32toh(_val) : le32toh(_val); \
+		break;                                        \
+	case 8:                                           \
+		_val = is_be ? be64toh(_val) : le64toh(_val); \
+		break;                                        \
+	}                                                 \
+                                                      \
+	_val;                                             \
 })
 
-#define set_hdr_field(pfx, idx, field, val) ({			\
-	uint64_t _val;						\
-	unsigned int _size;					\
-								\
-	if (is_64)						\
-		_size = sizeof(pfx##hdr64[0].field);		\
-	else							\
-		_size = sizeof(pfx##hdr32[0].field);		\
-								\
-	switch (_size) {					\
-	case 1:							\
-		_val = val;					\
-		break;						\
-	case 2:							\
-		_val = is_be ? htobe16(val) : htole16(val);	\
-		break;						\
-	case 4:							\
-		_val = is_be ? htobe32(val) : htole32(val);	\
-		break;						\
-	case 8:							\
-		_val = is_be ? htobe64(val) : htole64(val);	\
-		break;						\
-	default:						\
-		/* We should never reach here */		\
-		_val = 0;					\
-		assert(0);					\
-		break;						\
-	}							\
-								\
-	if (is_64)						\
-		pfx##hdr64[idx].field = _val;			\
-	else							\
-		pfx##hdr32[idx].field = _val;			\
+#define set_hdr_field(pfx, idx, field, val) ({      \
+	uint64_t _val;                                  \
+	unsigned int _size;                             \
+                                                    \
+	if (is_64)                                      \
+		_size = sizeof(pfx##hdr64[0].field);        \
+	else                                            \
+		_size = sizeof(pfx##hdr32[0].field);        \
+                                                    \
+	switch (_size)                                  \
+	{                                               \
+	case 1:                                         \
+		_val = val;                                 \
+		break;                                      \
+	case 2:                                         \
+		_val = is_be ? htobe16(val) : htole16(val); \
+		break;                                      \
+	case 4:                                         \
+		_val = is_be ? htobe32(val) : htole32(val); \
+		break;                                      \
+	case 8:                                         \
+		_val = is_be ? htobe64(val) : htole64(val); \
+		break;                                      \
+	default:                                        \
+		/* We should never reach here */            \
+		_val = 0;                                   \
+		assert(0);                                  \
+		break;                                      \
+	}                                               \
+                                                    \
+	if (is_64)                                      \
+		pfx##hdr64[idx].field = _val;               \
+	else                                            \
+		pfx##hdr32[idx].field = _val;               \
 })
 
 #define ehdr_field(field) \
@@ -102,43 +107,55 @@ uint64_t text_base;
 
 uint32_t type_freq[256];
 
-void print_type_freq() {
-	for(int i = 0 ; i < 256 ; i ++) {
-		if(type_freq[i]) printf("freq %d : %d\n",i,type_freq[i]);
+void print_type_freq()
+{
+	for (int i = 0; i < 256; i++)
+	{
+		if (type_freq[i])
+			printf("freq %d : %d\n", i, type_freq[i]);
 	}
 }
 
-struct mips_reloc {
+struct mips_reloc
+{
 	uint8_t type;
-	uint64_t offset;
+	uint32_t offset;
+	uint32_t addend;
 } *relocs;
 size_t relocs_sz, relocs_idx;
 
-static int add_reloc(unsigned int type, uint64_t off)
+static int add_reloc(unsigned int type, uint32_t off, uint32_t addend, uint32_t sym)
 {
 	struct mips_reloc *new;
 	size_t new_sz;
 
-	switch (type) {
+	switch (type)
+	{
 	case R_LARCH_32:
+	// case R_LARCH_SOP_PUSH_PCREL:
+	// case R_LARCH_SOP_PUSH_ABSOLUTE:
+	// case R_LARCH_SOP_PUSH_GPREL:
+	// case R_LARCH_SOP_PUSH_PLT_PCREL:
+	// case R_LARCH_SOP_SUB:
+	// case R_LARCH_SOP_SL:
+	// case R_LARCH_SOP_SR:
+	// case R_LARCH_SOP_ADD:
+	// case R_LARCH_SOP_POP_32_S_10_12:
+	// case R_LARCH_SOP_POP_32_S_10_16_S2:
+	// case R_LARCH_SOP_POP_32_S_5_20:
+	// case R_LARCH_SOP_POP_32_S_0_10_10_16_S2:
 		break;
-	// case R_MIPS_LO16:
-	// case R_MIPS_PC16:
-	// case R_MIPS_HIGHER:
-	// case R_MIPS_HIGHEST:
-	// case R_MIPS_PC21_S2:
-	// case R_MIPS_PC26_S2:
-	// 	/* Skip these relocs */
-	// 	return 0;
 	default:
 		return 0;
 	}
 	type_freq[type] += 1;
 
-	if (relocs_idx == relocs_sz) {
+	if (relocs_idx == relocs_sz)
+	{
 		new_sz = relocs_sz ? relocs_sz * 2 : 128;
 		new = realloc(relocs, new_sz * sizeof(*relocs));
-		if (!new) {
+		if (!new)
+		{
 			fprintf(stderr, "Out of memory\n");
 			return -ENOMEM;
 		}
@@ -150,6 +167,7 @@ static int add_reloc(unsigned int type, uint64_t off)
 	relocs[relocs_idx++] = (struct mips_reloc){
 		.type = type,
 		.offset = off,
+		.addend = sym
 	};
 
 	return 0;
@@ -166,21 +184,25 @@ static int parse_mips32_rel(const void *_rel)
 	type = is_be ? be32toh(rel->r_info) : le32toh(rel->r_info);
 	type = ELF32_R_TYPE(type);
 
-	return add_reloc(type, off);
+	return add_reloc(type, off, 0, 0);
 }
 
 static int parse_mips32_rela(const void *_rel)
 {
 	const Elf32_Rela *rel = _rel;
-	uint32_t off, type;
-
-	off = is_be ? be32toh(rel->r_offset) : le32toh(rel->r_offset);
-	off -= text_base;
+	uint32_t off, type, sym;
 
 	type = is_be ? be32toh(rel->r_info) : le32toh(rel->r_info);
+	sym = ELF32_R_SYM(type);
 	type = ELF32_R_TYPE(type);
+	off = is_be ? be32toh(rel->r_offset) : le32toh(rel->r_offset);
+	if ((off >= 0x9c008a70 && off <= 0x9c008a74))
+	{
+		printf("off is: 0x%x, added is: 0x%x, type is %d, sym is %x\n", off,rel->r_addend, type, sym);
+	}
+	off -= text_base;
 
-	return add_reloc(type, off);
+	return add_reloc(type, off, rel->r_addend, sym);
 }
 
 static int parse_mips64_rela(const void *_rel)
@@ -193,14 +215,15 @@ static int parse_mips64_rela(const void *_rel)
 
 	type = rel->r_info >> (64 - 8);
 
-	return add_reloc(type, off);
+	return add_reloc(type, off, rel->r_addend, 0);
 }
 
 static void output_uint(uint8_t **buf, uint64_t val)
 {
 	uint64_t tmp;
 
-	do {
+	do
+	{
 		tmp = val & 0x7f;
 		val >>= 7;
 		tmp |= !!val << 7;
@@ -233,20 +256,23 @@ int main(int argc, char *argv[])
 	bool skip;
 
 	fd = open(argv[1], O_RDWR);
-	if (fd == -1) {
+	if (fd == -1)
+	{
 		fprintf(stderr, "Unable to open input file %s\n", argv[1]);
 		err = errno;
 		goto out_ret;
 	}
 
 	err = fstat(fd, &st);
-	if (err) {
+	if (err)
+	{
 		fprintf(stderr, "Unable to fstat() input file\n");
 		goto out_close_fd;
 	}
 
 	elf = mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	if (elf == MAP_FAILED) {
+	if (elf == MAP_FAILED)
+	{
 		fprintf(stderr, "Unable to mmap() input file\n");
 		err = errno;
 		goto out_close_fd;
@@ -255,19 +281,22 @@ int main(int argc, char *argv[])
 	ehdr32 = elf;
 	ehdr64 = elf;
 
-	if (memcmp(&ehdr32->e_ident[EI_MAG0], ELFMAG, SELFMAG)) {
+	if (memcmp(&ehdr32->e_ident[EI_MAG0], ELFMAG, SELFMAG))
+	{
 		fprintf(stderr, "Input file is not an ELF\n");
 		err = -EINVAL;
 		goto out_free_relocs;
 	}
 
-	if (ehdr32->e_ident[EI_VERSION] != EV_CURRENT) {
+	if (ehdr32->e_ident[EI_VERSION] != EV_CURRENT)
+	{
 		fprintf(stderr, "Unrecognised ELF version\n");
 		err = -EINVAL;
 		goto out_free_relocs;
 	}
 
-	switch (ehdr32->e_ident[EI_CLASS]) {
+	switch (ehdr32->e_ident[EI_CLASS])
+	{
 	case ELFCLASS32:
 		is_64 = false;
 		break;
@@ -280,7 +309,8 @@ int main(int argc, char *argv[])
 		goto out_free_relocs;
 	}
 
-	switch (ehdr32->e_ident[EI_DATA]) {
+	switch (ehdr32->e_ident[EI_DATA])
+	{
 	case ELFDATA2LSB:
 		is_be = false;
 		break;
@@ -293,14 +323,16 @@ int main(int argc, char *argv[])
 		goto out_free_relocs;
 	}
 
-	if (ehdr_field(e_type) != ET_EXEC) {
+	if (ehdr_field(e_type) != ET_EXEC)
+	{
 		fprintf(stderr, "Input ELF is not an executable\n");
 		printf("type 0x%lx\n", ehdr_field(e_type));
 		err = -EINVAL;
 		goto out_free_relocs;
 	}
 
-	if (ehdr_field(e_machine) != 258) {
+	if (ehdr_field(e_machine) != 258)
+	{
 		fprintf(stderr, "Input ELF does not target LA32R %ld\n", ehdr_field(e_machine));
 		err = -EINVAL;
 		goto out_free_relocs;
@@ -311,25 +343,30 @@ int main(int argc, char *argv[])
 	shstrtab = elf + shdr_field(ehdr_field(e_shstrndx), sh_offset);
 
 	i_rel_shdr = UINT_MAX;
-	for (i = 0; i < ehdr_field(e_shnum); i++) {
+	for (i = 0; i < ehdr_field(e_shnum); i++)
+	{
 		sh_name = shstr(shdr_field(i, sh_name));
 
-		if (!strcmp(sh_name, ".data.reloc")) {
+		if (!strcmp(sh_name, ".data.reloc"))
+		{
 			i_rel_shdr = i;
 			continue;
 		}
 
-		if (!strcmp(sh_name, ".text")) {
+		if (!strcmp(sh_name, ".text"))
+		{
 			text_base = shdr_field(i, sh_addr);
 			continue;
 		}
 	}
-	if (i_rel_shdr == UINT_MAX) {
+	if (i_rel_shdr == UINT_MAX)
+	{
 		fprintf(stderr, "Unable to find .rel section\n");
 		err = -EINVAL;
 		goto out_free_relocs;
 	}
-	if (!text_base) {
+	if (!text_base)
+	{
 		fprintf(stderr, "Unable to find .text base address\n");
 		err = -EINVAL;
 		goto out_free_relocs;
@@ -338,13 +375,15 @@ int main(int argc, char *argv[])
 	// rel_pfx = is_64 ? ".rela." : ".rel.";
 	rel_pfx = ".rela.";
 
-	for (i = 0; i < ehdr_field(e_shnum); i++) {
+	for (i = 0; i < ehdr_field(e_shnum); i++)
+	{
 		sh_type = shdr_field(i, sh_type);
 		if ((sh_type != SHT_REL) && (sh_type != SHT_RELA))
 			continue;
 
 		sh_name = shstr(shdr_field(i, sh_name));
-		if (strncmp(sh_name, rel_pfx, strlen(rel_pfx))) {
+		if (strncmp(sh_name, rel_pfx, strlen(rel_pfx)))
+		{
 			if (strcmp(sh_name, ".rel") && strcmp(sh_name, ".rel.dyn"))
 				fprintf(stderr, "WARNING: Unexpected reloc section name '%s'\n", sh_name);
 			continue;
@@ -357,7 +396,8 @@ int main(int argc, char *argv[])
 		 * alloc flags set).
 		 */
 		skip = true;
-		for (j = 0; j < ehdr_field(e_shnum); j++) {
+		for (j = 0; j < ehdr_field(e_shnum); j++)
+		{
 			if (strcmp(&sh_name[strlen(rel_pfx) - 1], shstr(shdr_field(j, sh_name))))
 				continue;
 
@@ -371,18 +411,27 @@ int main(int argc, char *argv[])
 		sh_entsize = shdr_field(i, sh_entsize);
 		sh_entries = shdr_field(i, sh_size) / sh_entsize;
 
-		if (sh_type == SHT_REL) {
-			if (is_64) {
+		if (sh_type == SHT_REL)
+		{
+			if (is_64)
+			{
 				fprintf(stderr, "REL-style reloc in MIPS64 ELF?\n");
 				err = -EINVAL;
 				goto out_free_relocs;
-			} else {
+			}
+			else
+			{
 				parse_fn = parse_mips32_rel;
 			}
-		} else {
-			if (is_64) {
+		}
+		else
+		{
+			if (is_64)
+			{
 				parse_fn = parse_mips64_rela;
-			} else {
+			}
+			else
+			{
 				// fprintf(stderr, "RELA-style reloc in MIPS32 ELF?\n");
 				// err = -EINVAL;
 				// goto out_free_relocs;
@@ -390,7 +439,8 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		for (j = 0; j < sh_entries; j++) {
+		for (j = 0; j < sh_entries; j++)
+		{
 			err = parse_fn(elf + sh_offset + (j * sh_entsize));
 			if (err)
 				goto out_free_relocs;
@@ -398,7 +448,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Sort relocs in ascending order of offset */
-	qsort(relocs, relocs_idx, sizeof(*relocs), compare_relocs);
+	// qsort(relocs, relocs_idx, sizeof(*relocs), compare_relocs);
 
 	/* Make reloc offsets relative to their predecessor */
 	for (i = relocs_idx - 1; i > 0; i--)
@@ -406,9 +456,11 @@ int main(int argc, char *argv[])
 
 	/* Write the relocations to the .rel section */
 	buf = buf_start = elf + shdr_field(i_rel_shdr, sh_offset);
-	for (i = 0; i < relocs_idx; i++) {
+	for (i = 0; i < relocs_idx; i++)
+	{
 		output_uint(&buf, relocs[i].type);
 		output_uint(&buf, relocs[i].offset >> 2);
+		output_uint(&buf, relocs[i].addend);
 	}
 
 	/* Write a terminating R_MIPS_NONE (0) */
@@ -417,19 +469,21 @@ int main(int argc, char *argv[])
 	/* Ensure the relocs didn't overflow the .rel section */
 	rel_size = shdr_field(i_rel_shdr, sh_size);
 	rel_actual_size = buf - buf_start;
-	printf("rel_size is 0x%x, actual is 0x%x\n",rel_size,rel_actual_size);
-	if (rel_actual_size > rel_size) {
+	printf("rel_size is 0x%x, actual is 0x%x\n", rel_size, rel_actual_size);
+	if (rel_actual_size > rel_size)
+	{
 		fprintf(stderr, "Relocations overflow available space of 0x%lx (required 0x%lx)!\n",
-			rel_size, rel_actual_size);
+				rel_size, rel_actual_size);
 		fprintf(stderr, "Please adjust CONFIG_MIPS_RELOCATION_TABLE_SIZE to at least 0x%lx\n",
-			(rel_actual_size + 0x100) & ~0xFF);
+				(rel_actual_size + 0x100) & ~0xFF);
 		err = -ENOMEM;
 		goto out_free_relocs;
 	}
 
 	/* Make sure data is written back to the file */
 	err = msync(elf, st.st_size, MS_SYNC);
-	if (err) {
+	if (err)
+	{
 		fprintf(stderr, "Failed to msync: %d\n", errno);
 		goto out_free_relocs;
 	}

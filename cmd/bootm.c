@@ -128,7 +128,7 @@ int do_bootm(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 #ifdef CONFIG_SYS_BOOT_RAMDISK_HIGH
 		BOOTM_STATE_RAMDISK |
 #endif
-#if defined(CONFIG_PPC) || defined(CONFIG_MIPS)
+#if defined(CONFIG_PPC) || defined(CONFIG_MIPS) || defined(CONFIG_LA32R)
 		BOOTM_STATE_OS_CMDLINE |
 #endif
 		BOOTM_STATE_OS_PREP | BOOTM_STATE_OS_FAKE_GO |

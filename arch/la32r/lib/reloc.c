@@ -56,7 +56,7 @@ static unsigned long read_uint(uint8_t **buf)
 static int rela_stack_push(long stack_value, long *rela_stack, size_t *rela_stack_top)
 {
 	if (*rela_stack_top >= 16) {
-		prinf("rela_stack_top: %d\n",*rela_stack_top);
+		printf("rela_stack_top: %d\n",*rela_stack_top);
 		panic("rela stack push overflow");
 	}
 
@@ -68,7 +68,7 @@ static int rela_stack_push(long stack_value, long *rela_stack, size_t *rela_stac
 static int rela_stack_pop(long *stack_value, long *rela_stack, size_t *rela_stack_top)
 {
 	if (*rela_stack_top == 0) {
-		prinf("rela_stack_top: %d\n",*rela_stack_top);
+		printf("rela_stack_top: %d\n",*rela_stack_top);
 		panic("rela stack pop overflow");
 	}
 
@@ -81,36 +81,100 @@ static int rela_stack_pop(long *stack_value, long *rela_stack, size_t *rela_stac
  * @type: the type of reloc (R_MIPS_*)
  * @addr: the address that the reloc should be applied to
  * @off: the relocation offset, ie. number of bytes we're moving U-Boot by
- *
  * Apply a single relocation of type @type at @addr. This function is
  * intentionally simple, and does the bare minimum needed to fixup the
  * relocated U-Boot - in particular, it does not check for overflows.
+ * 
+ * @addend: the relocation addend
+ *
  */
-static void apply_reloc(unsigned int type, void *addr, long off, long* rela_stack, size_t *rela_stack_top)
+static void apply_reloc(unsigned int type, void *addr, long off, long addend, long* rela_stack, size_t *rela_stack_top)
 {
 	uint32_t u32;
+	int op1,op2;
 
 	switch (type) {
-	// case R_MIPS_26:
-	// 	u32 = *(uint32_t *)addr;
-	// 	u32 = (u32 & GENMASK(31, 26)) |
-	// 	      ((u32 + (off >> 2)) & GENMASK(25, 0));
-	// 	*(uint32_t *)addr = u32;
-	// 	break;
-
-	// case R_MIPS_32:
-	// 	*(uint32_t *)addr += off;
-	// 	break;
-
-	// case R_MIPS_64:
-	// 	*(uint64_t *)addr += off;
-	// 	break;
-
-	// case R_MIPS_HI16:
-	// 	*(uint32_t *)addr += off >> 16;
-	// 	break;
 	case R_LARCH_32:
-		*(uint32_t *)addr += off;
+		*(uint32_t *)addr = (*(uint32_t *)addr) + off;
+		break;
+	case R_LARCH_SOP_PUSH_PCREL:
+		rela_stack_push(addend,rela_stack,rela_stack_top);
+		break;
+	case R_LARCH_SOP_PUSH_ABSOLUTE:
+		rela_stack_push(addend - off + addr,rela_stack,rela_stack_top);
+		break;
+	case R_LARCH_SOP_PUSH_GPREL:
+		rela_stack_push(0,rela_stack,rela_stack_top);
+		break;
+	case R_LARCH_SOP_PUSH_PLT_PCREL:
+		rela_stack_push(addend,rela_stack,rela_stack_top);
+		break;
+	case R_LARCH_SOP_SUB:
+		rela_stack_pop(&op2,rela_stack,rela_stack_top);
+		rela_stack_pop(&op1,rela_stack,rela_stack_top);
+		rela_stack_push(op1 - op2,rela_stack,rela_stack_top);
+		break;
+	case R_LARCH_SOP_SL:
+		rela_stack_pop(&op2,rela_stack,rela_stack_top);
+		rela_stack_pop(&op1,rela_stack,rela_stack_top);
+		rela_stack_push(op1 << op2,rela_stack,rela_stack_top);
+		break;
+	case R_LARCH_SOP_SR:
+		rela_stack_pop(&op2,rela_stack,rela_stack_top);
+		rela_stack_pop(&op1,rela_stack,rela_stack_top);
+		rela_stack_push(op1 >> op2,rela_stack,rela_stack_top);
+		break;
+	case R_LARCH_SOP_ADD:
+		rela_stack_pop(&op2,rela_stack,rela_stack_top);
+		rela_stack_pop(&op1,rela_stack,rela_stack_top);
+		rela_stack_push(op1 + op2,rela_stack,rela_stack_top);
+		break;
+	case R_LARCH_SOP_POP_32_S_10_12:
+		rela_stack_pop(&op1,rela_stack,rela_stack_top);
+		if ((op1 & ~0x7ff) &&
+			(op1 & ~0x7ff) != ~0x7ff) {
+			panic("1: op1 = 0x%x overflow! @0x%x\n",op1,addr);
+		}
+		*(uint32_t *)addr = ((*(uint32_t *)addr) & (~0x3ffc00)) | ((op1 & 0xfff) << 10);
+		break;
+	case R_LARCH_SOP_POP_32_S_10_16_S2:
+		rela_stack_pop(&op1,rela_stack,rela_stack_top);
+
+		/* check 4-aligned */
+		if (op1 % 4) {
+			panic("2: op1 = 0x%x unaligned! @0x%x\n",op1,addr);
+		}
+		op1 >>= 2;
+
+		if ((op1 & ~0x7fff) &&
+			(op1 & ~0x7fff) != ~0x7fff) {
+			panic("3: op1 = 0x%x overflow! @0x%x\n",op1,addr);
+		}
+		(*(uint32_t *)addr) = ((*(uint32_t *)addr) & 0xfc0003ff) | ((op1 & 0xffff) << 10);
+		break;
+	case R_LARCH_SOP_POP_32_S_5_20:
+		rela_stack_pop(&op1,rela_stack,rela_stack_top);
+		if ((op1 & ~0x7ffff) &&
+			(op1 & ~0x7ffff) != ~0x7ffff) {
+			panic("4: op1 = 0x%x overflow! @0x%x\n",op1,addr);
+		}
+		*(uint32_t *)addr = ((*(uint32_t *)addr) & (~0x1ffffe0)) | ((op1 & 0xfffff) << 5);
+		break;
+	case R_LARCH_SOP_POP_32_S_0_10_10_16_S2:
+		rela_stack_pop(&op1,rela_stack,rela_stack_top);
+
+		/* check 4-aligned */
+		if (op1 % 4) {
+			panic("5: op1 = 0x%x unaligned! @0x%x\n",op1,addr);
+		}
+		op1 >>= 2;
+
+		if ((op1 & ~0x1ffffff) &&
+			(op1 & ~0x1ffffff) != ~0x1ffffff) {
+			panic("6: op1 = 0x%x overflow! @0x%x\n",op1,addr);
+		}
+		*(uint32_t *)addr = ((*(uint32_t *)addr) & 0xfc000000)
+		| ((op1 & 0x3ff0000) >> 16) | ((op1 & 0xffff) << 10);
 		break;
 	default:
 		panic("Unhandled reloc type %u\n", type);
@@ -133,7 +197,7 @@ void relocate_code(ulong start_addr_sp, gd_t *new_gd, ulong relocaddr)
 	unsigned long addr, length, bss_len;
 	uint8_t *buf, *bss_start;
 	unsigned int type;
-	long off;
+	long off, addend;
 	long rela_stack[16];
 	size_t rela_stack_top = 0;
 
@@ -161,9 +225,10 @@ void relocate_code(ulong start_addr_sp, gd_t *new_gd, ulong relocaddr)
 		type = read_uint(&buf);
 		if (type == 0)
 			break;
-
 		addr += read_uint(&buf) << 2;
-		apply_reloc(type, (void *)addr, off, rela_stack, &rela_stack_top);
+		addend = read_uint(&buf);
+		// printf("%x, %d, %d\n",addr,type,addend);
+		apply_reloc(type, (void *)addr, off, addend, rela_stack, &rela_stack_top);
 	}
 
 	/* Ensure the icache is coherent */

@@ -105,7 +105,7 @@ reset:
 	la		t0, cseg
 	jr		t0
 cseg:
-    li.w      t1, 0xa0000009  // uncacheed window
+    li.w    t1, 0xa0000009  // uncacheed window
     csrwr   t1, csr_dmw1
 	
 

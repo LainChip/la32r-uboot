@@ -273,6 +273,7 @@ static inline int _compare_and_overwrite_entry(ENTRY item, ACTION action,
 int hsearch_r(ENTRY item, ACTION action, ENTRY ** retval,
 	      struct hsearch_data *htab, int flag)
 {
+	int dbg_cnt = 0;
 	unsigned int hval;
 	unsigned int count;
 	unsigned int len = strlen(item.key);
@@ -283,21 +284,26 @@ int hsearch_r(ENTRY item, ACTION action, ENTRY ** retval,
 	/* Compute an value for the given string. Perhaps use a better method. */
 	hval = len;
 	count = len;
+	printf("hsearch_r: %d\n",++dbg_cnt);
 	while (count-- > 0) {
 		hval <<= 4;
 		hval += item.key[count];
 	}
+	printf("hsearch_r: %d\n",++dbg_cnt);
 
 	/*
 	 * First hash function:
 	 * simply take the modul but prevent zero.
 	 */
+	printf("hsearch_r-hval: %d , size: %d ,0x%x \n",hval,htab->size,htab);
 	hval %= htab->size;
+	printf("hsearch_r: %d\n",++dbg_cnt);
 	if (hval == 0)
 		++hval;
 
 	/* The first index tried. */
 	idx = hval;
+	printf("hsearch_r: %d\n",++dbg_cnt);
 
 	if (htab->table[idx].used) {
 		/*
@@ -351,6 +357,7 @@ int hsearch_r(ENTRY item, ACTION action, ENTRY ** retval,
 		while (htab->table[idx].used != USED_FREE);
 	}
 
+	printf("hsearch_r: %d\n",++dbg_cnt);
 	/* An empty bucket has been found. */
 	if (action == ENTER) {
 		/*
@@ -415,8 +422,11 @@ int hsearch_r(ENTRY item, ACTION action, ENTRY ** retval,
 		return 1;
 	}
 
+	printf("hsearch_r: %d\n",++dbg_cnt);
 	__set_errno(ESRCH);
+	printf("hsearch_r: %d\n",++dbg_cnt);
 	*retval = NULL;
+	printf("hsearch_r: %d\n",++dbg_cnt);
 	return 0;
 }
 

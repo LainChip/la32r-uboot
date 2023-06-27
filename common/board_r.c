@@ -440,18 +440,28 @@ static int should_load_env(void)
 
 static int initr_env(void)
 {
+	printf("initr_env: 1\n");
 	/* initialize environment */
-	if (should_load_env())
+	if (should_load_env()) {
+		printf("initr_env: 1-1\n");
 		env_relocate();
-	else
+		printf("initr_env: 1-2\n");
+	}
+	else {
+		printf("initr_env: 1-3\n");
 		set_default_env(NULL, 0);
+		printf("initr_env: 1-4\n");
+	}
+	printf("initr_env: 2\n");
 #ifdef CONFIG_OF_CONTROL
 	env_set_hex("fdtcontroladdr",
 		    (unsigned long)map_to_sysmem(gd->fdt_blob));
 #endif
 
+	printf("initr_env: 3\n");
 	/* Initialize from environment */
 	load_addr = env_get_ulong("loadaddr", 16, load_addr);
+	printf("initr_env: 4\n");
 
 	return 0;
 }
@@ -846,6 +856,7 @@ void board_init_r(gd_t *new_gd, ulong dest_addr)
 	 * TODO(sjg@chromium.org): Consider doing this for all archs, or
 	 * dropping the new_gd parameter.
 	 */
+	printf("board_init_r 0\n");
 #if CONFIG_IS_ENABLED(X86_64)
 	arch_setup_gd(new_gd);
 #endif
@@ -853,19 +864,22 @@ void board_init_r(gd_t *new_gd, ulong dest_addr)
 #ifdef CONFIG_NEEDS_MANUAL_RELOC
 	int i;
 #endif
+	printf("board_init_r 0-1\n");
 
 #if !defined(CONFIG_X86) && !defined(CONFIG_ARM) && !defined(CONFIG_ARM64)
 	gd = new_gd;
 #endif
 	gd->flags &= ~GD_FLG_LOG_READY;
+	printf("board_init_r 0-2\n");
 
 #ifdef CONFIG_NEEDS_MANUAL_RELOC
 	for (i = 0; i < ARRAY_SIZE(init_sequence_r); i++)
 		init_sequence_r[i] += gd->reloc_off;
 #endif
-
+	printf("board_init_r 1\n");
 	if (initcall_run_list(init_sequence_r))
 		hang();
+	printf("board_init_r 2\n");
 
 	/* NOTREACHED - run_main_loop() does not return */
 	hang();
