@@ -28,6 +28,11 @@ int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 }
 #endif
 
+int print_cpuinfo(void)
+{
+	printf("Greeting from lain soc!\n");
+	return 0;
+}
 int arch_cpu_init(void)
 {
 	mips_cache_probe();

@@ -31,6 +31,7 @@
 	aliases {
 		console = &serial0;
         serial = &serial0;
+		mmc0 = &mmc;
 	};
 
 	// serial0: serial@bfe40000 {
@@ -47,5 +48,20 @@
         clock-frequency = <33000000>;
         no-loopback-test;
     };
+
+	spi: spi@0x1fd01000 {
+		compatible = "xlnx,xps-spi-2.00.a";
+		reg = < 0x1fd01000 0x1000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		mmc: mmc@0 {
+			compatible = "mmc-spi-slot";
+			reg = <0>;
+			spi-max-frequency = <20000000>;
+			voltage-ranges = <3300 3300>;
+			disable-wp;
+		};
+	};
 };
+
 
