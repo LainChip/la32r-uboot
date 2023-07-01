@@ -42,6 +42,22 @@ config SYS_CONFIG_NAME
     default "megasoc_demo"
 
 config SYS_TEXT_BASE
-    default 0x9fc00000
+    default 0x9c000000
+
+endif
+
+if TARGET_LA32RMEGA_DEMO
+
+config SYS_BOARD
+    default "2019"
+
+config SYS_VENDOR
+    default "nscscc"
+
+config SYS_CONFIG_NAME
+    default "megasoc_demo"
+
+config SYS_TEXT_BASE
+    default 0x9c000000
 
 endif

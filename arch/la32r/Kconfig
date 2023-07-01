@@ -10,6 +10,9 @@ choice
 config TARGET_LA32RSOC_DEMO
     bool "LA32RSoC Demo SoC"
 
+config TARGET_LA32RMEGA_DEMO
+    bool "LA32RSoC Demo SoC"
+
 endchoice
 
 config LA32R_L1_CACHE_SHIFT
