@@ -711,6 +711,7 @@ int do_load(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[],
 	if (ret < 0)
 		return 1;
 
+	flush_cache(addr, len_read);
 	printf("%llu bytes read in %lu ms", len_read, time);
 	if (time > 0) {
 		puts(" (");

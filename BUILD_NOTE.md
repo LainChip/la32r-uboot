@@ -11,6 +11,8 @@ export CROSS_COMPILE=loongarch32r-linux-gnusf-
 clear && make la32rmega_defconfig && make && loongarch32r-linux-gnusf-objdump -S u-boot > u-boot.S
 loongarch32r-linux-gnusf-objcopy ./u-boot -O binary u-boot.bin
 
-# Uboot 启动 MOS 命令
+# Uboot 编译-启动 MOS 命令
+make test lab=5_3 && loongarch32r-linux-gnusf-objcopy ./target/mos ./target/mos.bin -O binary
 fatload mmc 0 0x80000000 mos.bin
-go 0x80011550
+fatload mmc 0 0x83800000 fs.img
+go 0x80010b08
