@@ -228,6 +228,8 @@ cseg:
 	// PTR_LA	t9, mips_cache_reset
 	// jalr	t9
 	bl		lal1_cache_reset
+    li.w      t1, 0x80000019  // cacheed window, set cache attribute
+    csrwr   t1, csr_dmw0
 	//  nop
 
 	// TODO: lowlevel_init
@@ -244,4 +246,5 @@ cseg:
 	// jr	t9
 
 
-	END(_start)
+END(_start)
+

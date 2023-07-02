@@ -420,8 +420,12 @@ LEAF(lal1_cache_reset)
 1:  
     cacop   0x0, t0, 0x0  #0 way  icache
     cacop   0x0, t0, 0x1  #1 way  icache
+    cacop   0x0, t0, 0x2  #2 way  icache
+    cacop   0x0, t0, 0x3  #3 way  icache
     cacop   0x1, t0, 0x0  #0 way  dcache
-    cacop   0x1, t0, 0x1  #1 way  dcache 
+    cacop   0x1, t0, 0x1  #1 way  dcache
+    cacop   0x1, t0, 0x2  #2 way  dcache
+    cacop   0x1, t0, 0x3  #3 way  dcache
     addi.w  t1, t1, -1 
     srli.w  t0, t0, 4
     addi.w  t0, t0, 1 
@@ -430,17 +434,3 @@ LEAF(lal1_cache_reset)
 cache_init_finish:
     jirl    zero, ra, 0
 END(lal1_cache_reset)
-
-LEAF(change_k0_cca)
-	mfc0		t0, CP0_CONFIG
-#if __mips_isa_rev >= 2
-	ins		t0, a0, 0, 3
-#else
-	xor		a0, a0, t0
-	andi		a0, a0, CONF_CM_CMASK
-	xor		a0, a0, t0
-#endif
-	mtc0		a0, CP0_CONFIG
-
-	jr.hb		ra
-	END(change_k0_cca)
