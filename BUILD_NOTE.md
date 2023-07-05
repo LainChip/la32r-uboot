@@ -12,7 +12,7 @@ clear && make la32rmega_defconfig && make && loongarch32r-linux-gnusf-objdump -S
 loongarch32r-linux-gnusf-objcopy ./u-boot -O binary u-boot.bin
 
 # Uboot 编译-启动 MOS 命令
-make test lab=5_3 && loongarch32r-linux-gnusf-objcopy ./target/mos ./target/mos.bin -O binary
+make && loongarch32r-linux-gnusf-objcopy ./target/mos ./target/mos.bin -O binary
 fatload mmc 0 0x80000000 mos.bin
 fatload mmc 0 0x83800000 fs.img
-go 0x80010b08
+go 0x80010b24

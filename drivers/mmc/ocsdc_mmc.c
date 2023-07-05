@@ -93,7 +93,7 @@ static inline void ocsdc_write(struct ocsdc_mmc_priv *dev, int offset, u32 data)
 
 static void ocsdc_set_timeout(struct ocsdc_mmc_priv * dev)
 {
-	const uint timeout_us = 2000;
+	const uint timeout_us = 200000; // 200ms
 	uint clk_freq = (dev->clk_freq) / (2 * (dev->clk_div + 1));
 	uint timeout_reg = timeout_us * (clk_freq / 1000000);
 	if (timeout_reg > 0xFFFF)
@@ -338,7 +338,7 @@ static int ocsdc_mmc_probe(struct udevice *dev)
 	cfg->f_max = priv->clk_freq/2; /*minimum clock division by 2 */
         cfg->voltages = ocsdc_get_voltage(priv);
         cfg->host_caps = MMC_MODE_4BIT;
-        cfg->b_max = 0xFFFF;
+        cfg->b_max = 0x100;
         upriv->mmc = &plat->mmc;
 
         ocsdc_init(priv);
