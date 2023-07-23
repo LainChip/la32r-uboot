@@ -26,7 +26,7 @@ config SYS_CONFIG_NAME
     default "megasoc_demo"
 
 config SYS_TEXT_BASE
-    default 0x9fc00000
+    default 0xBC000000
 
 endif
 
@@ -42,7 +42,7 @@ config SYS_CONFIG_NAME
     default "megasoc_demo"
 
 config SYS_TEXT_BASE
-    default 0x9c000000
+    default 0xBC000000
 
 endif
 
@@ -58,6 +58,6 @@ config SYS_CONFIG_NAME
     default "megasoc_demo"
 
 config SYS_TEXT_BASE
-    default 0x9c000000
+    default 0xBC000000
 
 endif

@@ -16,24 +16,24 @@
 #define CONFIG_SYS_MIPS_CACHE_MODE	CONF_CM_CACHABLE_NONCOHERENT
 
 /* Time Measuring */
-#define TRIVIALMIPS_NSCSCC_TIMER_ADDR		0xbfd0e000
+#define TRIVIALMIPS_NSCSCC_TIMER_ADDR		0x9fd0e000
 
 /*----------------------------------------------------------------------
  * Memory Layout
  */
 
 /* SDRAM Configuration (for final code, data, stack, heap) */
-#define CONFIG_SYS_SDRAM_BASE		0x80000000
+#define CONFIG_SYS_SDRAM_BASE		0xA0000000
 #define CONFIG_SYS_SDRAM_SIZE		0x04000000	/* 128 Mbytes */
 #define CONFIG_SYS_INIT_SP_ADDR		\
 	(CONFIG_SYS_SDRAM_BASE + CONFIG_SYS_SDRAM_SIZE - 0x1000)
 
-#define CONFIG_SYS_MEMTEST_START    0x80000000
+#define CONFIG_SYS_MEMTEST_START    0xA0000000
 #define CONFIG_SYS_MEMTEST_END      0x04000000
 
 #define CONFIG_SYS_MALLOC_LEN		(256 << 10)
 #define CONFIG_SYS_MONITOR_BASE		CONFIG_SYS_TEXT_BASE
-#define CONFIG_SYS_LOAD_ADDR		0x80000000 /* default load address */
+#define CONFIG_SYS_LOAD_ADDR		0xA0000000 /* default load address */
 
 /*----------------------------------------------------------------------
  * Commands
@@ -50,7 +50,7 @@
 
 // serial configuration
 #define CONFIG_CONS_INDEX 1
-#define CONFIG_SYS_NS16550_COM1 0xbfe40000
+#define CONFIG_SYS_NS16550_COM1 0x9fe40000
 #define CONFIG_SYS_NS16550_CLK 100000000
 #define CONFIG_SYS_NS16550_IER 0
 

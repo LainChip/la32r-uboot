@@ -48,18 +48,18 @@
         spi0 = &spi_flash;
 	};
 
-	serial0: serial@bfe40000 {
+	serial0: serial@9fe40000 {
 		compatible = "ns16550";
-		reg = <0xbfe40000 0x1000>;
+		reg = <0x9fe40000 0x1000>;
         reg-offset = <0>;
         reg-shift = <0>;
         clocks = <&bus_clk>;
         current-speed = <230400>;
 	};
 
-	ocsdc0: ocsdc@bfe10000 {
+	ocsdc0: ocsdc@9fe10000 {
 		compatible = "opencores,ocsdc";
-		reg = <0xbfe10000 0x1000>;
+		reg = <0x9fe10000 0x1000>;
         clocks = <&bus_clk>;
 	};
 
@@ -92,7 +92,7 @@
                 #address-cells = <1>;
                 #size-cells = <0>;
                 compatible = "loongson,spi";
-                reg = <0xbfe80000 0x1000>;
+                reg = <0x9fe80000 0x1000>;
                 clocks = <&bus_clk>;
 
                 spi-flash@0 {

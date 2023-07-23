@@ -92,14 +92,14 @@
  * These are the traditional names used in the 32-bit universe.
  */
 #define KUSEG			0x00000000
-#define KSEG0			0x80000000
-#define KSEG1			0xa0000000
+#define KSEG0			0xa0000000
+#define KSEG1			0x80000000
 #define KSEG2			0xc0000000
 #define KSEG3			0xe0000000
 
 #define CKUSEG			0x00000000
-#define CKSEG0			0x80000000
-#define CKSEG1			0xa0000000
+#define CKSEG0			0xa0000000
+#define CKSEG1			0x80000000
 #define CKSEG2			0xc0000000
 #define CKSEG3			0xe0000000
 

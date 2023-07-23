@@ -34,9 +34,9 @@
 		mmc0 = &mmc;
 	};
 
-	// serial0: serial@bfe40000 {
+	// serial0: serial@9fe40000 {
 	// 	compatible = "ns16550";
-	// 	reg = <0xbfe40000 0x1000>;
+	// 	reg = <0x9fe40000 0x1000>;
     //     reg-offset = <0>;
     //     reg-shift = <0>;
     //     clocks = <&bus_clk>;

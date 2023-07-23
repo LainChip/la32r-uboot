@@ -36,9 +36,9 @@
         spi0 = &spi_flash;
 	};
 
-	serial0: serial@bfe40000 {
+	serial0: serial@9fe40000 {
 		compatible = "ns16550a";
-		reg = <0xbfe40000 0x1000>;
+		reg = <0x9fe40000 0x1000>;
         reg-offset = <0>;
         reg-shift = <0>;
         clocks = <&bus_clk>;
@@ -46,13 +46,13 @@
         no-loopback-test;
 	};
 
-	ocsdc0: ocsdc@bfe10000 {
+	ocsdc0: ocsdc@9fe10000 {
 		compatible = "opencores,ocsdc";
-		reg = <0xbfe10000 0x1000>;
+		reg = <0x9fe10000 0x1000>;
         clocks = <&bus_clk>;
 	};
 
-	axi_ethernetlite: ethernet@bff00000 {
+	axi_ethernetlite: ethernet@9ff00000 {
 		compatible = "xlnx,xps-ethernetlite-1.00.a";
 		device_type = "network";
 		local-mac-address = [19 98 00 01 00 29];
@@ -76,11 +76,11 @@
 				} ;
 		} ;
 	};
-    spi_flash: spi@bc040000 {
+    spi_flash: spi@9c040000 {
             #address-cells = <1>;
             #size-cells = <0>;
             compatible = "loongson,spi";
-            reg = <0xbfe80000 0x1000>;
+            reg = <0x9fe80000 0x1000>;
             clocks = <&bus_clk>;
             spi-flash@0 {
                 compatible = "spi-flash", "jedec,spi-nor";

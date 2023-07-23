@@ -199,10 +199,6 @@ static int parse_mips32_rela(const void *_rel)
 	type = ELF32_R_TYPE(type);
 	off = is_be ? be32toh(rel->r_offset) : le32toh(rel->r_offset);
 	sym = sym32[sym].st_value;
-	if ((off >= 0x9c008a70 && off <= 0x9c008a74))
-	{
-		printf("off is: 0x%x, added is: 0x%x, type is %d, sym is %x\n", off,rel->r_addend, type, sym);
-	}
 	off -= text_base;
 
 	return add_reloc(type, off, rel->r_addend, sym);

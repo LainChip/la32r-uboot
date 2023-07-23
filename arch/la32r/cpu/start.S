@@ -201,7 +201,7 @@ reset:
 	li.w    t0, 0x1c000380
 	csrwr   t0, csr_tlbrentry
 
-    li.w      t1, 0x80000009  // cacheed window, cache attribute is set after 
+    li.w      t1, 0xa0000009  // cacheed window, cache attribute is set after 
     csrwr   t1, csr_dmw0 
     li.w      t1, 0x00000009  // uncacheed window, temporary
     csrwr   t1, csr_dmw1
@@ -212,7 +212,7 @@ reset:
 	la		t0, cseg
 	jr		t0
 cseg:
-    li.w    t1, 0xa0000009  // uncacheed window
+    li.w    t1, 0x80000009  // uncacheed window
     csrwr   t1, csr_dmw1
 	
 
@@ -228,7 +228,7 @@ cseg:
 	// PTR_LA	t9, mips_cache_reset
 	// jalr	t9
 	bl		lal1_cache_reset
-    li.w      t1, 0x80000019  // cacheed window, set cache attribute
+    li.w      t1, 0xa0000019  // cacheed window, set cache attribute
     csrwr   t1, csr_dmw0
 	//  nop
 

@@ -31,6 +31,17 @@ config SYS_DCACHE_LINE_SIZE
 	help
 	  The size of L1 Dcache lines, if known at compile time.
 
+menu "OS boot interface"
+
+config LA32R_BOOT_FDT
+	bool "Hand over a flattened device tree to Linux kernel"
+	default y
+	help
+	  Enable this option if you want U-Boot to hand over a flattened
+	  device tree to the kernel. According to UHI register $a0 will be set
+	  to -2 and the FDT address is stored in $a1.
+endmenu
+
 config LA32R_RELOCATION_TABLE_SIZE
 	hex "Relocation table size"
 	range 0x100 0x4000

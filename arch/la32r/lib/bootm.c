@@ -226,7 +226,7 @@ static int boot_reloc_fdt(bootm_headers_t *images)
 		return 0;
 	}
 
-#if CONFIG_IS_ENABLED(MIPS_BOOT_FDT) && CONFIG_IS_ENABLED(OF_LIBFDT)
+#if CONFIG_IS_ENABLED(LA32R_BOOT_FDT) && CONFIG_IS_ENABLED(OF_LIBFDT)
 	boot_fdt_add_mem_rsv_regions(&images->lmb, images->ft_addr);
 	return boot_relocate_fdt(&images->lmb, &images->ft_addr,
 		&images->ft_len);
@@ -235,7 +235,7 @@ static int boot_reloc_fdt(bootm_headers_t *images)
 #endif
 }
 
-#if CONFIG_IS_ENABLED(MIPS_BOOT_FDT) && CONFIG_IS_ENABLED(OF_LIBFDT)
+#if CONFIG_IS_ENABLED(LA32R_BOOT_FDT) && CONFIG_IS_ENABLED(OF_LIBFDT)
 int arch_fixup_fdt(void *blob)
 {
 	u64 mem_start = virt_to_phys((void *)gd->bd->bi_memstart);
@@ -255,7 +255,7 @@ static int boot_setup_fdt(bootm_headers_t *images)
 
 static void boot_prep_linux(bootm_headers_t *images)
 {
-	if (CONFIG_IS_ENABLED(MIPS_BOOT_FDT) && images->ft_len) {
+	if (CONFIG_IS_ENABLED(LA32R_BOOT_FDT) && images->ft_len) {
 		boot_reloc_fdt(images);
 		boot_setup_fdt(images);
 	} else {

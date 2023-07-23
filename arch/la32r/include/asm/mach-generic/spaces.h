@@ -19,13 +19,13 @@
 #ifdef CONFIG_KVM_GUEST
 #define CAC_BASE		_AC(0x40000000, UL)
 #else
-#define CAC_BASE		_AC(0x80000000, UL)
+#define CAC_BASE		_AC(0xa0000000, UL)
 #endif
 #ifndef IO_BASE
-#define IO_BASE			_AC(0xa0000000, UL)
+#define IO_BASE			_AC(0x80000000, UL)
 #endif
 #ifndef UNCAC_BASE
-#define UNCAC_BASE		_AC(0xa0000000, UL)
+#define UNCAC_BASE		_AC(0x80000000, UL)
 #endif
 
 #ifndef MAP_BASE
