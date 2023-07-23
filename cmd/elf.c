@@ -240,6 +240,7 @@ static unsigned long do_bootelf_exec(ulong (*entry)(int, char * const[]),
 	 * pass address parameter as argv[0] (aka command name),
 	 * and all remaining args
 	 */
+	printf("do_bootelf_exec...\n");
 	ret = entry(argc, argv);
 
 	return ret;
@@ -312,9 +313,12 @@ int do_bootelf(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	 * pass address parameter as argv[0] (aka command name),
 	 * and all remaining args
 	 */
+	printf("argc: %d, argv_addr: %08lx\n", argc, argv);
+	printf("argv: %08lx, %08lx, %08lx, %08lx\n", argv[0], argv[1], argv[2], argv[3]);
+	printf("argv0: %s\nargv1:%s\nargv2:%s\n", argv[0], argv[1], argv[2]);
 	rc = do_bootelf_exec((void *)addr, argc, argv);
 	if (rc != 0)
-		rcode = 1;
+		rcode = 1;	
 
 	printf("## Application terminated, rc = 0x%lx\n", rc);
 
