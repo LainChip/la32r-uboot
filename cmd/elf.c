@@ -231,7 +231,7 @@ static unsigned long load_elf_image_shdr(unsigned long addr)
 }
 
 /* Allow ports to override the default behavior */
-static unsigned long do_bootelf_exec(ulong (*entry)(int, char * const[]),
+static unsigned long do_bootelf_exec(ulong (*entry)(int, char * const[], void*, void*),
 				     int argc, char * const argv[])
 {
 	unsigned long ret;
@@ -240,8 +240,12 @@ static unsigned long do_bootelf_exec(ulong (*entry)(int, char * const[]),
 	 * pass address parameter as argv[0] (aka command name),
 	 * and all remaining args
 	 */
+	unsigned char elf_buf[128];
+	for(int i = 0 ; i < 128 ; i++) {
+		elf_buf[i] = 0;
+	}
 	printf("do_bootelf_exec...\n");
-	ret = entry(argc, argv);
+	ret = entry(argc, argv, elf_buf, NULL);
 
 	return ret;
 }

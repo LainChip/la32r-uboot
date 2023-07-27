@@ -111,6 +111,13 @@ static void linux_cmdline_legacy(bootm_headers_t *images)
 
 		bootargs = next;
 	}
+	// __uint32_t ret;
+	// ret = (3 + 1) * sizeof(__uint32_t);
+	// __uint32_t a1 = (0xa0000000UL + ((0x4f << 20)));
+	// __uint32_t a2 = (0xa0000000UL + ((0x4f << 20))) + ret;
+	// const char * a1p = &(a1), a2p = &(a2);
+	// linux_cmdline_set(a1p, sizeof(a1));
+	// linux_cmdline_set(a2p, sizeof(a2));
 }
 
 static void linux_cmdline_append(bootm_headers_t *images)
