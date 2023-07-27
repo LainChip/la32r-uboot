@@ -91,6 +91,12 @@ ENTRY(_start)
 	.org 0x380
 	csrwr     t0, csr_save0
 	csrwr     t1, csr_save1
+	csrrd     t0, csr_era
+	csrwr     t0, csr_save2
+    la        t0, 1f
+	csrwr     t0, csr_era
+	ertn
+1:
 	lu12i.w   t0, -131072
 	pcaddu12i t1, 0
 	and       t0, t1, t0
@@ -144,7 +150,8 @@ ENTRY(_start)
 	st.w    t1, t0, TF_ECTL
 	csrrd	t1, csr_estat
 	st.w    t1, t0, TF_ESTAT
-	csrrd	t1, csr_era
+	// csrrd	t1, csr_era
+	csrrd   t1, csr_save2
 	st.w    t1, t0, TF_ERA
 	csrrd	t1, csr_badv
 	st.w    t1, t0, TF_BADV
@@ -192,7 +199,8 @@ ENTRY(_start)
 	st.w    t1, t0, TF_DMW0
 	csrrd	t1, csr_dmw1
 	st.w    t1, t0, TF_DMW1
-	add.w   a0, t1, zero
+	add.w	a0, t0, zero
+	addi.w  sp, t0, 1024
 	b       do_reserved
 
 reset:
