@@ -335,7 +335,7 @@ static int ocsdc_mmc_probe(struct udevice *dev)
         priv->clk_freq = clk_get_rate(&clk);
         priv->iobase = dev_read_addr(dev);
         cfg->f_min = priv->clk_freq/64; /*maximum clock division by 64 */
-	cfg->f_max = priv->clk_freq/2; /*minimum clock division by 2 */
+		cfg->f_max = priv->clk_freq/2; /*minimum clock division by 2 */
         cfg->voltages = ocsdc_get_voltage(priv);
         cfg->host_caps = MMC_MODE_4BIT;
         cfg->b_max = 0x100;
